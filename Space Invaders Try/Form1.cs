@@ -17,51 +17,97 @@ namespace Space_Invaders_Try
         private bool moveLeft;
         private bool moveRight;
         private bool game;
-        private int limit;
+        private int limit = 700;
         private int top;
         private int left;
         private int cnt;
         private int speed;
-        private Timer timer1, timer2, timer3, timer4, timer5, Observer;
+        private bool enemiesTimerStatus;
+        private Timer timer1;
+        private Timer timer2;
+        private Timer timer3 = new Timer();
+        private Timer timer4 = new Timer();
+        private Timer timer5 = new Timer();
+        private Timer Observer = new Timer();
         private int pts;
         private List<PictureBox> delay;
-        private PictureBox label2;
+        private Label label2;
         private int x, y;
-        private Player player;
+        //private Player player;
         private Background backGround;
+        private PictureBox playerBox;
+        private List<PictureBox> enemies;
 
         public Form1()
         {
             InitializeComponent();
-            new GameObjects.Enemies().CreateSprites(this);
-            new GameObjects.Player().CreateControlPlayer(this);
-            new GameObjects.Background().CreateControlText(this);
+            enemies = new GameObjects.Enemies().CreateSprites(this);
+            playerBox = new GameObjects.Player().CreateControlPlayer(this);
+            Controls.Add(playerBox);
+            label2 = new GameObjects.Background().CreateControlText(this);
+            Controls.Add(label2);
             InsertAliens();
+            insertLifeLabel();
+            insertLifePictureBox();
+
+        }
+        public void InitTimerMoveAliens()
+        {
+            timer1 = new Timer();
+            timer1.Tick += new EventHandler(MoveAliens);
+            timer1.Interval = 100; // in miliseconds
+            timer1.Start();
+        }
+        public void InitTimerFireAliens()
+        {
+            timer2 = new Timer();
+            timer2.Tick += new EventHandler(StrikeSpan);
+            timer2.Interval = 500; // in miliseconds
+            timer2.Start();
         }
 
         private void Pressed(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
             {
+                if (!enemiesTimerStatus)
+                {
+                    InitTimerMoveAliens();
+                    InitTimerFireAliens();
+                }
                 moveLeft = true;
-                PlayerMove();
+                PlayerMove(sender, e);
             }
             else if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
             {
+                if (!enemiesTimerStatus)
+                {
+                    InitTimerMoveAliens();
+                    InitTimerFireAliens();
+                    
+                }
                 moveRight = true;
-                PlayerMove();
+                PlayerMove(sender, e);
             }
             else if (e.KeyCode == Keys.Space && game && !fired)
             {
+                if (!enemiesTimerStatus)
+                {
+                    InitTimerMoveAliens();
+                    InitTimerFireAliens();
+
+                }
+
                 Missile();
                 fired = true;
+                FireBullet(sender, e);
             }
         }
 
         private void Missile()
         {
             PictureBox bullet = new PictureBox();
-            bullet.Location = new Point(player.Location.X + player.Width / 2, player.Location.Y - 20);
+            bullet.Location = new Point(playerBox.Location.X + playerBox.Width / 2, playerBox.Location.Y - 20);
             bullet.Size = new Size(5, 20);
             bullet.BackgroundImage = Properties.Resources.bullet;
             bullet.BackgroundImageLayout = ImageLayout.Stretch;
@@ -85,15 +131,15 @@ namespace Space_Invaders_Try
             }
         }
 
-        private void PlayerMove()
+        private void PlayerMove(object sender, EventArgs e)
         {
-            if (moveLeft && player.Location.X >= 0)
+            if (moveLeft && playerBox.Location.X >= 0)
             {
-                player.pb.Left--;
+                playerBox.Left--;
             }
-            else if (moveRight && player.Location.X <= limit)
+            else if (moveRight && playerBox.Location.X <= limit)
             {
-                player.pb.Left++;
+                playerBox.Left++;
             }
         }
 
@@ -124,17 +170,22 @@ namespace Space_Invaders_Try
 
         private void AlienMove()
         {
-            foreach (PictureBox alien in aliens)
+            foreach (PictureBox enemy in enemies)
             {
-                alien.Location = new Point(alien.Location.X + left, alien.Location.Y + top);
-                SetDirection(alien);
-                Collided(alien);
+                left = 1;
+                top = 0;
+                BeginInvoke(new Action(() =>
+                {
+                    enemy.Location = new Point(enemy.Location.X + left, enemy.Location.Y + top);
+                }));
+                SetDirection(enemy);
+                Collided(enemy);
             }
         }
 
         private void Collided(PictureBox a)
         {
-            if (a.Bounds.IntersectsWith(player.Bounds))
+            if (a.Bounds.IntersectsWith(playerBox.Bounds))
             {
                 gameOver();
             }
@@ -143,6 +194,7 @@ namespace Space_Invaders_Try
         private void MoveAliens(object sender, EventArgs e)
         {
             AlienMove();
+            enemiesTimerStatus = true;
         }
 
         private void Beam(PictureBox a)
@@ -150,10 +202,13 @@ namespace Space_Invaders_Try
             PictureBox laser = new PictureBox();
             laser.Location = new Point(a.Location.X + a.Width / 3, a.Location.Y + 20);
             laser.Size = new Size(5, 20);
-            laser.BackgroundImage = Properties.Resources.bullet;
+            laser.BackgroundImage = Properties.Resources.laser;
             laser.BackgroundImageLayout = ImageLayout.Stretch;
             laser.Name = "Laser";
-            this.Controls.Add(laser);
+            BeginInvoke(new Action(() =>
+            {
+                this.Controls.Add(laser);
+            }));
         }
 
         private void StrikeSpan(object sender, EventArgs e)
@@ -161,10 +216,10 @@ namespace Space_Invaders_Try
             Random r = new Random();
             int pick;
 
-            if (aliens.Count > 0)
+            if (enemies.Count > 0)
             {
-                pick = r.Next(aliens.Count);
-                Beam(aliens[pick]);
+                pick = r.Next(enemies.Count);
+                Beam(enemies[pick]);
             }
         }
 
@@ -181,7 +236,7 @@ namespace Space_Invaders_Try
                     {
                         this.Controls.Remove(laser);
                     }
-                    if (laser.Bounds.IntersectsWith(player.Bounds))
+                    if (laser.Bounds.IntersectsWith(playerBox.Bounds))
                     {
                         this.Controls.Remove(laser);
                         LoseLife();
@@ -228,7 +283,7 @@ namespace Space_Invaders_Try
                             {
                                 this.Controls.Remove(bullet);
                                 this.Controls.Remove(alien);
-                                aliens.Remove(alien);
+                                enemies.Remove(alien);
                                 pts += 5;
                                 Score(pts);
                                 CheckForWinner();
@@ -259,26 +314,27 @@ namespace Space_Invaders_Try
 
             foreach (PictureBox delayed in delay)
             {
-                aliens.Remove(delayed);
+                enemies.Remove(delayed);
             }
             delay.Clear();
         }
 
         private void Score(int pts)
         {
-            backGround.score.Text = "Score: " + pts.ToString();
+
+            label2.Text = "Score: " + pts.ToString();
         }
 
         private void LoseLife()
         {
-            player.Location = new Point(x, y);
+            playerBox.Location = new Point(x, y);
 
             foreach (Control c in this.Controls)
             {
                 if (c is PictureBox && c.Name.Contains("Life") && c.Visible == true)
                 {
-                    PictureBox player = (PictureBox)c;
-                    player.Visible = false;
+                    playerBox = (PictureBox)c;
+                    playerBox.Visible = false;
                     return;
                 }
             }

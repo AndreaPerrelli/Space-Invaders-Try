@@ -15,6 +15,8 @@ namespace Space_Invaders_Try
             private int width, height;
             private int columns, rows;
             private int x, y, space;
+            private PictureBox enemy;
+            private List<PictureBox> enemyGroup;
 
             public Enemies()
             {
@@ -26,29 +28,35 @@ namespace Space_Invaders_Try
                 x = 150;
                 y = 0;
             }
-            private void CreateControlEnemy(Form p)
+            private PictureBox CreateControlEnemy(Form p)
             {
+
                 PictureBox pb = new PictureBox();
                 pb.Location = new Point(x, y);
                 pb.Size = new Size(width, height);
                 pb.BackgroundImage = Properties.Resources.inavders;
                 pb.BackgroundImageLayout = ImageLayout.Stretch;
                 pb.Name = "Alien";
+                return pb;
                 p.Controls.Add(pb);
             }
-            public void CreateSprites(Form p)
+            public List<PictureBox> CreateSprites(Form p)
             {
+                enemyGroup = new List<PictureBox>();
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < columns; j++)
                     {
-                        CreateControlEnemy(p);
+                        enemy = CreateControlEnemy(p);
+                        enemyGroup.Add(enemy);
                         x += width + space;
                     }
                     y += height + space;
                     x = 150;
                 }
+                return enemyGroup;
             }
+
         }
 
         internal class Player
@@ -66,17 +74,17 @@ namespace Space_Invaders_Try
                 Width = 0;
                 sizeOfPlayer = new Size(50, 50);
                 Bounds = new Rectangle(Location, sizeOfPlayer);
-                pb = new PictureBox();
             }
 
-            public void CreateControlPlayer(Form p)
+            public PictureBox CreateControlPlayer(Form p)
             {
+                pb = new PictureBox();
                 pb.Location = Location;
                 pb.Size = sizeOfPlayer;
                 pb.BackgroundImage = Properties.Resources.tank;
                 pb.BackgroundImageLayout = ImageLayout.Stretch;
-                pb.Name = "Player";
-                p.Controls.Add(pb);
+                pb.Name = "Player";               
+                return pb;
             }
 
             private Point GetLocation()
@@ -115,7 +123,7 @@ namespace Space_Invaders_Try
             }
 
 
-            public void CreateControlText(Form p)
+            public Label CreateControlText(Form p)
             {
                 Label score = new Label();
                 score.Location = location;
@@ -124,7 +132,8 @@ namespace Space_Invaders_Try
                 score.Font = new Font("Calibri", 18);
                 score.ForeColor = Color.White;
                 score.Padding = new Padding(6);
-                p.Controls.Add(score);
+                //p.Controls.Add(score);
+                return score;
             }
         }
 

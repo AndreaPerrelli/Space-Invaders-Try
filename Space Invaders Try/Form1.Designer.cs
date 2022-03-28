@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 using static Space_Invaders_Try.GameObjects;
 
@@ -10,7 +11,8 @@ namespace Space_Invaders_Try
         /// Variabile di progettazione necessaria.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        private List<PictureBox> aliens = new List<PictureBox>();
+        private Label lifeLabel;
+        private PictureBox lifeIcon;
 
         /// <summary>
         /// Pulire le risorse in uso.
@@ -47,8 +49,8 @@ namespace Space_Invaders_Try
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Pressed);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Released);
             this.game = true;
-            this.player = new Player();
-            this.backGround = new Background();
+            //this.player = new Player();
+            //this.backGround = new Background();
             this.ResumeLayout(false);
 
         }
@@ -56,16 +58,48 @@ namespace Space_Invaders_Try
 
         private void InsertAliens()
         {
-            foreach (Control c in this.Controls)
+
+            foreach (PictureBox enemy in enemies)
             {
-                if (c is PictureBox && c.Name == "Alien")
-                {
-                    PictureBox alien = (PictureBox)c;
-                    aliens.Add(alien);
-                }
+                this.Controls.Add(enemy);
             }
+            //foreach (Control c in this.Controls)
+            //{
+            //    if (c is PictureBox && c.Name == "Alien")
+            //    {
+            //        PictureBox alien = (PictureBox)c;
+            //        aliens.Add(alien);
+            //    }
+            //}
         }
 
+        private void insertLifeLabel()
+        {
+            lifeLabel = new Label();
+            lifeLabel.Location = new Point(0, 400);
+            lifeLabel.AutoSize = true;
+            lifeLabel.Text = "Life : ";
+            lifeLabel.Font = new Font("Calibri", 18);
+            lifeLabel.ForeColor = Color.White;
+            lifeLabel.Padding = new Padding(6);
+            this.Controls.Add(lifeLabel);
+        }
+
+        private void insertLifePictureBox()
+        {
+            lifeIcon = new PictureBox();
+            lifeIcon.Location = new Point(5, 400);
+            lifeIcon.Image = Properties.Resources.tank;
+            lifeIcon.ForeColor = Color.White;
+            lifeIcon.Name = "Life";
+            this.Controls.Add(lifeIcon);
+            lifeIcon = new PictureBox();
+            lifeIcon.Location = new Point(40, 400);
+            lifeIcon.Image = Properties.Resources.tank;
+            lifeIcon.ForeColor = Color.White;
+            lifeIcon.Name = "Life";
+            this.Controls.Add(lifeIcon);
+        }
         #endregion
     }
 }
