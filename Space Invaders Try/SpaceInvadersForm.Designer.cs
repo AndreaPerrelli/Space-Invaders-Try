@@ -5,7 +5,7 @@ using static Space_Invaders_Try.GameObjects;
 
 namespace Space_Invaders_Try
 {
-    partial class Form1
+    partial class SpaceInvadersForm
     {
         /// <summary>
         /// Variabile di progettazione necessaria.
@@ -59,7 +59,7 @@ namespace Space_Invaders_Try
         private void InsertAliens()
         {
 
-            foreach (PictureBox enemy in enemies)
+            foreach (PictureBox enemy in enemiesBox)
             {
                 this.Controls.Add(enemy);
             }

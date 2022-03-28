@@ -15,6 +15,8 @@ namespace Space_Invaders_Try
             private int width, height;
             private int columns, rows;
             private int x, y, space;
+            private int movementSpeed;
+            private int laserSpeed;
             private PictureBox enemy;
             private List<PictureBox> enemyGroup;
 
@@ -27,6 +29,8 @@ namespace Space_Invaders_Try
                 space = 10;
                 x = 150;
                 y = 0;
+                movementSpeed = 5;
+                laserSpeed = 20;
             }
             private PictureBox CreateControlEnemy(Form p)
             {
@@ -57,21 +61,44 @@ namespace Space_Invaders_Try
                 return enemyGroup;
             }
 
+            public int GetMovementSpeed()
+            {
+                return movementSpeed;
+            }
+            public void SetMovementSpeed(int speed)
+            {
+                this.movementSpeed = speed;
+            }
+
+            public int GetLaserSpeed()
+            {
+                return laserSpeed;
+            }
+
+            public void SetLaserSpeed(int laserSpeed)
+            {
+                this.laserSpeed = laserSpeed;
+            }
+
         }
 
         internal class Player
         {
-            public Point Location;
-            public int Left, Width;
-            public Rectangle Bounds;
-            public Size sizeOfPlayer;
-            public PictureBox pb;
+            private Point Location;
+            private int Left, Width;
+            private Rectangle Bounds;
+            private Size sizeOfPlayer;
+            private PictureBox pb;
+            private int movementSpeed;
+            private int bulletSpeed;
 
             public Player()
             {
                 Location = new Point(350, 400);
                 Left = 0;
                 Width = 0;
+                movementSpeed = 5;
+                bulletSpeed = 15;
                 sizeOfPlayer = new Size(50, 50);
                 Bounds = new Rectangle(Location, sizeOfPlayer);
             }
@@ -87,25 +114,23 @@ namespace Space_Invaders_Try
                 return pb;
             }
 
-            private Point GetLocation()
+            public int GetMovementSpeed()
             {
-                return Location;
+                return movementSpeed;
             }
-            private void SetLocation(Point point)
+            public void SetMovementSpeed(int movementSpeed)
             {
-                Location = point;
-            }
-
-            private int GetLeft()
-            {
-                return Left;
+                this.movementSpeed = movementSpeed;
             }
 
-            private void SetLeft(int left)
+            public int GetBulletSpeed()
             {
-                Left = left;
+                return bulletSpeed;
             }
-
+            public void SetBulletSpeed(int bulletSpeed)
+            {
+                this.bulletSpeed = bulletSpeed;
+            }
 
 
         }
@@ -113,20 +138,20 @@ namespace Space_Invaders_Try
         internal class Background
         {
             public Label score;
-            public Point location;
+            public int x, y;
             public Size size;
 
             public Background()
             {
-
-                location = new Point(500, 400);
+                x = 500;
+                y = 400;
             }
 
 
-            public Label CreateControlText(Form p)
+            public Label CreateLabelScore(Form p)
             {
                 Label score = new Label();
-                score.Location = location;
+                score.Location = new Point(x, y);
                 score.AutoSize = true;
                 score.Text = "Score :";
                 score.Font = new Font("Calibri", 18);
@@ -134,6 +159,21 @@ namespace Space_Invaders_Try
                 score.Padding = new Padding(6);
                 //p.Controls.Add(score);
                 return score;
+            }
+
+            public Label CreateLabelFinish(Form p)
+            {
+                Label finish = new Label();
+                finish.Location = new Point(x - 100, y - 100);
+                finish.AutoSize = true;
+                finish.Text = "";
+                finish.Font = new Font("Calibri", 18);
+                finish.ForeColor = Color.White;
+                finish.Padding = new Padding(6);
+                finish.Name = "Finish";
+                finish.Visible = false;
+                return finish;
+
             }
         }
 

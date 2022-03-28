@@ -11,96 +11,139 @@ using static Space_Invaders_Try.GameObjects;
 
 namespace Space_Invaders_Try
 {
-    public partial class Form1 : Form
+    public partial class SpaceInvadersForm : Form
     {
-        private bool fired;
-        private bool moveLeft;
-        private bool moveRight;
-        private bool game;
-        private int limit = 700;
-        private int top;
-        private int left;
-        private int cnt;
-        private int speed;
-        private bool enemiesTimerStatus;
-        private Timer timer1;
-        private Timer timer2;
-        private Timer timer3 = new Timer();
-        private Timer timer4 = new Timer();
-        private Timer timer5 = new Timer();
+        private bool fired, moveLeft, moveRight, game;
+        private int limit = 700, top, left, cnt, speed, pts, x, y;
+        private Timer timer;
         private Timer Observer = new Timer();
-        private int pts;
-        private List<PictureBox> delay;
-        private Label label2;
-        private int x, y;
-        //private Player player;
-        private Background backGround;
+        private List<PictureBox> delay, enemiesBox;
+        private Label scoreLabel, finishLabel;
+        private Player player;
+        private Enemies enemies;
         private PictureBox playerBox;
-        private List<PictureBox> enemies;
+        public int timerMoveAliens = 500, timerFireAliens = 2000, timerFirePlayer = 100, timerDetectLaser = 100; // 500, 2000, 100, 100 milliseconds
 
-        public Form1()
+        public SpaceInvadersForm()
         {
             InitializeComponent();
-            enemies = new GameObjects.Enemies().CreateSprites(this);
-            playerBox = new GameObjects.Player().CreateControlPlayer(this);
-            Controls.Add(playerBox);
-            label2 = new GameObjects.Background().CreateControlText(this);
-            Controls.Add(label2);
-            InsertAliens();
-            insertLifeLabel();
-            insertLifePictureBox();
+            initializeGameState();
 
         }
-        public void InitTimerMoveAliens()
+
+        public void initTimer()
+        {
+            timer = new Timer();
+            timer.Tick += new EventHandler(timer_Tick);
+            timer.Interval = 100;
+            timer.Start();
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+
+            timerMoveAliens -= 100; // -100 milliseconds 
+            timerFireAliens -= 100;
+            timerFirePlayer -= 100;
+            timerDetectLaser -= 100;
+
+            if (timerMoveAliens.Equals(0))
+            {
+                MoveAliens(sender, e);
+                timerMoveAliens = 500;
+            }
+            if (timerFireAliens.Equals(0))
+            {
+                StrikeSpan(sender, e);
+                timerFireAliens = 2000;
+            }
+            if (timerFirePlayer.Equals(0))
+            {
+                FireBullet(sender, e);
+                timerFirePlayer = 100;
+            }
+            if (timerDetectLaser.Equals(0))
+            {
+                DetectLaser(sender, e);
+                timerDetectLaser = 100;
+            }
+        }
+        
+       /* public void InitTimerMoveAliens()
         {
             timer1 = new Timer();
             timer1.Tick += new EventHandler(MoveAliens);
-            timer1.Interval = 100; // in miliseconds
+            timer1.Interval = 500; // in miliseconds
             timer1.Start();
         }
         public void InitTimerFireAliens()
         {
             timer2 = new Timer();
             timer2.Tick += new EventHandler(StrikeSpan);
-            timer2.Interval = 500; // in miliseconds
+            timer2.Interval = 2000; // in miliseconds
             timer2.Start();
         }
+        
+        public void InitTimerFirePlayer()
+        {
+            timer4 = new Timer();
+            timer4.Tick += new EventHandler(FireBullet);
+            timer4.Interval = 100;
+            timer4.Start();
+        }
 
+        public void InitTimerDetectLaser()
+        {
+            timer5 = new Timer();
+            timer5.Tick += new EventHandler(DetectLaser);
+            timer5.Interval = 50;
+            timer5.Start();
+        }
+       */
         private void Pressed(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
             {
-                if (!enemiesTimerStatus)
-                {
-                    InitTimerMoveAliens();
-                    InitTimerFireAliens();
-                }
+                //if (!enemiesTimerStatus)
+                //{
+                //    InitTimerMoveAliens();
+                //    InitTimerFireAliens();
+                //    InitTimerDetectLaser();
+
+                //}
                 moveLeft = true;
                 PlayerMove(sender, e);
             }
             else if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
             {
-                if (!enemiesTimerStatus)
+                /*if (!enemiesTimerStatus)
                 {
                     InitTimerMoveAliens();
                     InitTimerFireAliens();
-                    
-                }
+                    InitTimerDetectLaser();
+
+                }*/
                 moveRight = true;
                 PlayerMove(sender, e);
             }
             else if (e.KeyCode == Keys.Space && game && !fired)
             {
-                if (!enemiesTimerStatus)
+                /*if (!enemiesTimerStatus)
                 {
                     InitTimerMoveAliens();
                     InitTimerFireAliens();
+                    InitTimerDetectLaser();
 
                 }
-
+                */
                 Missile();
                 fired = true;
-                FireBullet(sender, e);
+                //InitTimerFirePlayer();
+            }
+
+            else if(e.KeyCode == Keys.E)
+            {
+                ResetGame(sender, e);
             }
         }
 
@@ -135,11 +178,11 @@ namespace Space_Invaders_Try
         {
             if (moveLeft && playerBox.Location.X >= 0)
             {
-                playerBox.Left--;
+                playerBox.Left -= player.GetMovementSpeed();
             }
             else if (moveRight && playerBox.Location.X <= limit)
             {
-                playerBox.Left++;
+                playerBox.Left += player.GetMovementSpeed();
             }
         }
 
@@ -170,9 +213,9 @@ namespace Space_Invaders_Try
 
         private void AlienMove()
         {
-            foreach (PictureBox enemy in enemies)
+            foreach (PictureBox enemy in enemiesBox)
             {
-                left = 1;
+                left = player.GetMovementSpeed();
                 top = 0;
                 BeginInvoke(new Action(() =>
                 {
@@ -194,7 +237,7 @@ namespace Space_Invaders_Try
         private void MoveAliens(object sender, EventArgs e)
         {
             AlienMove();
-            enemiesTimerStatus = true;
+            //enemiesTimerStatus = true;
         }
 
         private void Beam(PictureBox a)
@@ -216,11 +259,12 @@ namespace Space_Invaders_Try
             Random r = new Random();
             int pick;
 
-            if (enemies.Count > 0)
+            if (enemiesBox.Count > 0)
             {
-                pick = r.Next(enemies.Count);
-                Beam(enemies[pick]);
+                pick = r.Next(enemiesBox.Count);
+                Beam(enemiesBox[pick]);
             }
+
         }
 
         private void DetectLaser(object sender, EventArgs e)
@@ -230,7 +274,7 @@ namespace Space_Invaders_Try
                 if (c is PictureBox && c.Name == "Laser")
                 {
                     PictureBox laser = (PictureBox)c;
-                    laser.Top += 5;
+                    laser.Top += enemies.GetLaserSpeed();
 
                     if (laser.Location.Y >= limit)
                     {
@@ -252,7 +296,7 @@ namespace Space_Invaders_Try
                 if (c is PictureBox && c.Name == "Bullet")
                 {
                     PictureBox bullet = (PictureBox)c;
-                    bullet.Top -= 5;
+                    bullet.Top -= player.GetBulletSpeed();
 
                     if (bullet.Location.Y <= 0)
                     {
@@ -281,9 +325,11 @@ namespace Space_Invaders_Try
 
                             if (bullet.Bounds.IntersectsWith(alien.Bounds) && !Touched(alien))
                             {
+
                                 this.Controls.Remove(bullet);
                                 this.Controls.Remove(alien);
-                                enemies.Remove(alien);
+                                enemiesBox.Remove(alien);
+                                ModifyGameStats();
                                 pts += 5;
                                 Score(pts);
                                 CheckForWinner();
@@ -292,7 +338,7 @@ namespace Space_Invaders_Try
                             {
                                 this.Controls.Remove(bullet);
                                 this.Controls.Remove(alien);
-                                delay.Add(alien);
+                                //delay.Add(alien);
                                 pts += 5;
                                 Score(pts);
                                 CheckForWinner();
@@ -301,6 +347,23 @@ namespace Space_Invaders_Try
                     }
                 }
             }
+        }
+
+        private void ModifyGameStats()
+        {
+            int enemyLaserSpeed = enemies.GetLaserSpeed();
+            int enemyMovementSpeed = enemies.GetMovementSpeed();
+            int playerMovementSpeed = player.GetMovementSpeed();
+            int playerBulletSpeed = player.GetBulletSpeed();
+               player.SetMovementSpeed(playerMovementSpeed++);
+            player.SetBulletSpeed(playerBulletSpeed++);
+            enemies.SetLaserSpeed(enemyLaserSpeed++);
+            enemies.SetMovementSpeed(enemyMovementSpeed++);
+        }
+
+        private void FireLaser(object sender, EventArgs e)
+        {
+
         }
 
         private void getPositionCursor(object sender, EventArgs e)
@@ -314,7 +377,7 @@ namespace Space_Invaders_Try
 
             foreach (PictureBox delayed in delay)
             {
-                enemies.Remove(delayed);
+                enemiesBox.Remove(delayed);
             }
             delay.Clear();
         }
@@ -322,16 +385,16 @@ namespace Space_Invaders_Try
         private void Score(int pts)
         {
 
-            label2.Text = "Score: " + pts.ToString();
+            scoreLabel.Text = "Score: " + pts.ToString();
         }
 
         private void LoseLife()
         {
-            playerBox.Location = new Point(x, y);
+            playerBox.Location = new Point(350, 400);
 
             foreach (Control c in this.Controls)
             {
-                if (c is PictureBox && c.Name.Contains("Life") && c.Visible == true)
+                if (c is PictureBox && c.Name.Contains("Life") && c.Visible == false)
                 {
                     playerBox = (PictureBox)c;
                     playerBox.Visible = false;
@@ -343,14 +406,13 @@ namespace Space_Invaders_Try
 
         private void gameOver()
         {
-            timer1.Stop(); timer2.Stop(); timer3.Stop(); timer4.Stop(); timer5.Stop(); Observer.Stop();
+            timer.Stop(); Observer.Stop();
 
             foreach (Control c in this.Controls)
             {
                 if (c is Label && c.Name == "Finish")
                 {
-                    Label lbl = (Label)c;
-                    lbl.Text = "Game Over!";
+                    finishLabel.Text = "Game Over!";
                     game = false;
                 }
                 else
@@ -379,10 +441,10 @@ namespace Space_Invaders_Try
             foreach (Control c in this.Controls)
             {
                 if (c is Label && c.Name == "Finish")
-                {
-                    Label lbl = (Label)c;
-                    lbl.Text = "You Won!" + "\n"
+                {  
+                    finishLabel.Text = "You Won!" + "\n"
                                + "Score: " + pts.ToString();
+
                 }
                 else
                 {
@@ -390,5 +452,51 @@ namespace Space_Invaders_Try
                 }
             }
         }
+
+        private void initializeGameState()
+        {
+            InitializeGameObjects();
+            InitializePictureBox();
+            InitializeLabel();
+            InsertAliens();
+            insertLifeLabel();
+            insertLifePictureBox();
+            initTimer();
+
+        } 
+
+        private void InitializeGameObjects()
+        {
+            player = new Player();
+            enemies = new Enemies();
+        }
+
+        private void InitializePictureBox()
+        {
+            enemiesBox = new GameObjects.Enemies().CreateSprites(this);
+            playerBox = new GameObjects.Player().CreateControlPlayer(this);
+            Controls.Add(playerBox);
+        }
+
+        private void InitializeLabel()
+        {
+            scoreLabel = new GameObjects.Background().CreateLabelScore(this);
+            Controls.Add(scoreLabel);
+            finishLabel = new GameObjects.Background().CreateLabelFinish(this);
+            Controls.Add(finishLabel);
+
+
+        }
+
+        private void ResetGame(object sender, EventArgs e)
+        {
+            timer.Stop(); Observer.Stop();
+            SpaceInvadersForm NewForm = new SpaceInvadersForm();
+            NewForm.Show();
+            this.Dispose(false);
+        }
+
     }
+
+
 }
