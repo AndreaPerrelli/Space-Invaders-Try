@@ -19,6 +19,7 @@ namespace Space_Invaders_Try
             private int laserSpeed;
             private PictureBox enemy;
             private List<PictureBox> enemyGroup;
+            private int fireRate;
 
             public Enemies()
             {
@@ -31,6 +32,7 @@ namespace Space_Invaders_Try
                 y = 0;
                 movementSpeed = 5;
                 laserSpeed = 20;
+                fireRate = 5;
             }
             private PictureBox CreateControlEnemy(Form p)
             {
@@ -80,6 +82,17 @@ namespace Space_Invaders_Try
                 this.laserSpeed = laserSpeed;
             }
 
+            public int GetFireRate()
+            {
+                return fireRate;
+            }
+
+            public void SetFireRate(int fireRate)
+            {
+                this.fireRate = fireRate;
+            }
+
+
         }
 
         internal class Player
@@ -91,6 +104,7 @@ namespace Space_Invaders_Try
             private PictureBox pb;
             private int movementSpeed;
             private int bulletSpeed;
+            private int fireRate;
 
             public Player()
             {
@@ -99,6 +113,7 @@ namespace Space_Invaders_Try
                 Width = 0;
                 movementSpeed = 5;
                 bulletSpeed = 15;
+                fireRate = 5;
                 sizeOfPlayer = new Size(50, 50);
                 Bounds = new Rectangle(Location, sizeOfPlayer);
             }
@@ -132,6 +147,15 @@ namespace Space_Invaders_Try
                 this.bulletSpeed = bulletSpeed;
             }
 
+            public int GetFireRate()
+            {
+                return fireRate;
+            }
+
+            public void SetFireRate(int fireRate)
+            {
+                this.fireRate = fireRate;
+            }
 
         }
 
